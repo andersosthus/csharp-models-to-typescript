@@ -6,4 +6,7 @@ lib/csharp-models-to-json_test/obj/
 lib/csharp-models-to-json_test/bin/
 
 .vscode/*
-.idea/*
+**/.idea/*
+**.d.ts
+config.json
+**/*.DotSettings.*

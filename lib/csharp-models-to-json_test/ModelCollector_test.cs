@@ -1,14 +1,13 @@
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NUnit.Framework;
+using Xunit;
 
 namespace CSharpModelsToJson.Tests
 {
-    [TestFixture]
     public class ModelCollectorTest
     {
-        [Test]
+        [Fact]
         public void BasicInheritance_ReturnsInheritedClass()
         {
             var tree = CSharpSyntaxTree.ParseText(@"
@@ -25,11 +24,11 @@ namespace CSharpModelsToJson.Tests
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
 
-            Assert.IsNotNull(modelCollector.Models);
-            Assert.AreEqual(new[] { "B", "C", "D" }, modelCollector.Models.First().BaseClasses);
+            Assert.NotNull(modelCollector.Models);
+            Assert.Equal(new[] { "B", "C", "D" }, modelCollector.Models.First().BaseClasses);
         }
 
-        [Test]
+        [Fact]
         public void InterfaceImport_ReturnsSyntaxClassFromInterface()
         {
             var tree = CSharpSyntaxTree.ParseText(@"
@@ -67,13 +66,13 @@ namespace CSharpModelsToJson.Tests
             var modelCollector = new ModelCollector();
             modelCollector.Visit(root);
 
-            Assert.IsNotNull(modelCollector.Models);
-            Assert.AreEqual(3, modelCollector.Models.Count);
-            Assert.AreEqual(3, modelCollector.Models.First().Properties.Count());
+            Assert.NotNull(modelCollector.Models);
+            Assert.Equal(3, modelCollector.Models.Count);
+            Assert.Equal(3, modelCollector.Models.First().Properties.Count());
         }
 
 
-        [Test]
+        [Fact]
         public void TypedInheritance_ReturnsInheritance()
         {
             var tree = CSharpSyntaxTree.ParseText(@"
@@ -90,11 +89,11 @@ namespace CSharpModelsToJson.Tests
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
 
-            Assert.IsNotNull(modelCollector.Models);
-            Assert.AreEqual(new[] { "IController<Controller>" }, modelCollector.Models.First().BaseClasses);
+            Assert.NotNull(modelCollector.Models);
+            Assert.Equal(new[] { "IController<Controller>" }, modelCollector.Models.First().BaseClasses);
         }
 
-        [Test]
+        [Fact]
         public void AccessibilityRespected_ReturnsPublicOnly()
         {
             var tree = CSharpSyntaxTree.ParseText(@"
@@ -119,12 +118,12 @@ namespace CSharpModelsToJson.Tests
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
 
-            Assert.IsNotNull(modelCollector.Models);
-            Assert.IsNotNull(modelCollector.Models.First().Properties);
-            Assert.AreEqual(1, modelCollector.Models.First().Properties.Count());
+            Assert.NotNull(modelCollector.Models);
+            Assert.NotNull(modelCollector.Models.First().Properties);
+            Assert.Single(modelCollector.Models.First().Properties);
         }
 
-        [Test]
+        [Fact]
         public void IgnoresJsonIgnored_ReturnsOnlyNotIgnored()
         {
             var tree = CSharpSyntaxTree.ParseText(@"
@@ -152,12 +151,12 @@ namespace CSharpModelsToJson.Tests
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
 
-            Assert.IsNotNull(modelCollector.Models);
-            Assert.IsNotNull(modelCollector.Models.First().Properties);
-            Assert.AreEqual(1, modelCollector.Models.First().Properties.Count());
+            Assert.NotNull(modelCollector.Models);
+            Assert.NotNull(modelCollector.Models.First().Properties);
+            Assert.Single(modelCollector.Models.First().Properties);
         }
 
-        [Test]
+        [Fact]
         public void DictionaryInheritance_ReturnsIndexAccessor()
         {
             var tree = CSharpSyntaxTree.ParseText(@"public class A : Dictionary<string, string> { }");
@@ -166,10 +165,10 @@ namespace CSharpModelsToJson.Tests
 
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
-
-            Assert.IsNotNull(modelCollector.Models);
-            Assert.IsNotNull(modelCollector.Models.First().BaseClasses);
-            Assert.AreEqual(new[] { "Dictionary<string, string>" }, modelCollector.Models.First().BaseClasses);
+            
+            Assert.NotNull(modelCollector.Models);
+            Assert.NotNull(modelCollector.Models.First().BaseClasses);
+            Assert.Equal(new[] { "Dictionary<string, string>" }, modelCollector.Models.First().BaseClasses);
         }
     }
 }

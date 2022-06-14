@@ -28,7 +28,7 @@ namespace CSharpModelsToJson
 
     public class ModelCollector : CSharpSyntaxWalker
     {
-        public readonly List<Model> Models = new List<Model>();
+        public readonly List<Model> Models = new();
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
@@ -46,13 +46,14 @@ namespace CSharpModelsToJson
 
         public override void VisitRecordDeclaration(RecordDeclarationSyntax node)
         {
-            var model = new Model()
+            var model = new Model
             {
                 ModelName = $"{node.Identifier.ToString()}{node.TypeParameterList?.ToString()}",
                 Fields = node.ParameterList?.Parameters
                                 .Where(field => IsAccessible(field.Modifiers))
                                 .Where(property => !IsIgnored(property.AttributeLists))
-                                .Select((field) => new Field
+                                .Where(field => field.Type != null)
+                                .Select(field => new Field
                                     {
                                         Identifier = field.Identifier.ToString(),
                                         Type = field.Type.ToString(),
@@ -69,7 +70,7 @@ namespace CSharpModelsToJson
 
         private static Model CreateModel(TypeDeclarationSyntax node)
         {
-            return new Model()
+            return new Model
             {
                 ModelName = $"{node.Identifier.ToString()}{node.TypeParameterList?.ToString()}",
                 Fields = node.Members.OfType<FieldDeclarationSyntax>()
@@ -95,13 +96,13 @@ namespace CSharpModelsToJson
             modifier.ToString() != "private"
         );
 
-        private static Field ConvertField(FieldDeclarationSyntax field) => new Field
+        private static Field ConvertField(FieldDeclarationSyntax field) => new()
         {
             Identifier = field.Declaration.Variables.First().GetText().ToString(),
             Type = field.Declaration.Type.ToString(),
         };
 
-        private static Property ConvertProperty(PropertyDeclarationSyntax property) => new Property
+        private static Property ConvertProperty(PropertyDeclarationSyntax property) => new()
         {
             Identifier = property.Identifier.ToString(),
             Type = property.Type.ToString(),
